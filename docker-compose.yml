@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  # Master Node (NameNode, ResourceManager, Spark Master)
+  hadoop-master:
+    build: 
+      context: ./dockerfiles/hadoop-master
+    container_name: hadoop-master
+    hostname: hadoop-master
+    ports:
+      - "9870:9870"  # HDFS Web UI
+      - "8088:8088"  # Yarn Web UI
+      - "8080:8080"  # Spark Web UI
+      - "7077:7077"  # Spark Master Port
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - hadoop_master_data:/hadoop/data
+    environment:
+      - HADOOP_ROLE=master
+      - CLUSTER_NAME=bigdata-cluster
+    networks:
+      - bigdata-net
+    command: ["/scripts/setup/init-hadoop.sh", "master"]
+
+  # Secondary Master Node (SecondaryNameNode)
+  hadoop-secondary:
+    build: 
+      context: ./dockerfiles/hadoop-base
+    container_name: hadoop-secondary
+    hostname: hadoop-secondary
+    ports:
+      - "9868:9868"  # Secondary NameNode Web UI
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - hadoop_secondary_data:/hadoop/data
+    environment:
+      - HADOOP_ROLE=secondary
+      - CLUSTER_NAME=bigdata-cluster
+    networks:
+      - bigdata-net
+    depends_on:
+      - hadoop-master
+    command: ["/scripts/setup/init-hadoop.sh", "secondary"]
+
+  # Worker Node 1
+  hadoop-worker1:
+    build: 
+      context: ./dockerfiles/hadoop-worker
+    container_name: hadoop-worker1
+    hostname: hadoop-worker1
+    ports:
+      - "8081:8081"  # Spark Worker Web UI
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - hadoop_worker1_data:/hadoop/data
+    environment:
+      - HADOOP_ROLE=worker
+      - WORKER_ID=1
+      - CLUSTER_NAME=bigdata-cluster
+    networks:
+      - bigdata-net
+    depends_on:
+      - hadoop-master
+    command: ["/scripts/setup/init-hadoop.sh", "worker"]
+
+  # Worker Node 2
+  hadoop-worker2:
+    build: 
+      context: ./dockerfiles/hadoop-worker
+    container_name: hadoop-worker2
+    hostname: hadoop-worker2
+    ports:
+      - "8082:8082"  # Spark Worker Web UI
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - hadoop_worker2_data:/hadoop/data
+    environment:
+      - HADOOP_ROLE=worker
+      - WORKER_ID=2
+      - CLUSTER_NAME=bigdata-cluster
+    networks:
+      - bigdata-net
+    depends_on:
+      - hadoop-master
+    command: ["/scripts/setup/init-hadoop.sh", "worker"]
+
+  # Worker Node 3
+  hadoop-worker3:
+    build: 
+      context: ./dockerfiles/hadoop-worker
+    container_name: hadoop-worker3
+    hostname: hadoop-worker3
+    ports:
+      - "8083:8083"  # Spark Worker Web UI
+    volumes:
+      - ./config:/config
+      - ./scripts:/scripts
+      - hadoop_worker3_data:/hadoop/data
+    environment:
+      - HADOOP_ROLE=worker
+      - WORKER_ID=3
+      - CLUSTER_NAME=bigdata-cluster
+    networks:
+      - bigdata-net
+    depends_on:
+      - hadoop-master
+    command: ["/scripts/setup/init-hadoop.sh", "worker"]
+
+  # MongoDB
+  mongodb:
+    build: 
+      context: ./dockerfiles/mongodb
+    container_name: mongodb
+    hostname: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_DATABASE=bigdata
+    networks:
+      - bigdata-net
+
+  # Application Web Flask
+  web-app:
+    build: 
+      context: ./app
+    container_name: web-app
+    hostname: web-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app
+    environment:
+      - FLASK_ENV=development
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/bigdata?authSource=admin
+      - HADOOP_MASTER=hadoop-master
+    networks:
+      - bigdata-net
+    depends_on:
+      - hadoop-master
+      - mongodb
+
+volumes:
+  hadoop_master_data:
+  hadoop_secondary_data:
+  hadoop_worker1_data:
+  hadoop_worker2_data:
+  hadoop_worker3_data:
+  mongodb_data:
+
+networks:
+  bigdata-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

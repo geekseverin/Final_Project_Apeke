@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://hadoop-master:9000</value>
+    </property>
+    
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/hadoop/data/tmp</value>
+    </property>
+    
+    <property>
+        <name>hadoop.proxyuser.hadoop.hosts</name>
+        <value>*</value>
+    </property>
+    
+    <property>
+        <name>hadoop.proxyuser.hadoop.groups</name>
+        <value>*</value>
+    </property>
+
+    <!-- MongoDB Connector Configuration -->
+    <property>
+        <name>mongo.job.input.format</name>
+        <value>com.mongodb.hadoop.MongoInputFormat</value>
+    </property>
+    
+    <property>
+        <name>mongo.job.output.format</name>
+        <value>com.mongodb.hadoop.MongoOutputFormat</value>
+    </property>
+    
+    <property>
+        <name>mongo.input.uri</name>
+        <value>mongodb://admin:password123@mongodb:27017/bigdata.collection</value>
+    </property>
+</configuration>

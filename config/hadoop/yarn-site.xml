@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<configuration>
+    <property>
+        <n>yarn.resourcemanager.hostname</n>
+        <value>hadoop-master</value>
+    </property>
+    
+    <property>
+        <n>yarn.resourcemanager.address</n>
+        <value>hadoop-master:8032</value>
+    </property>
+    
+    <property>
+        <n>yarn.resourcemanager.scheduler.address</n>
+        <value>hadoop-master:8030</value>
+    </property>
+    
+    <property>
+        <n>yarn.resourcemanager.resource-tracker.address</n>
+        <value>hadoop-master:8031</value>
+    </property>
+    
+    <property>
+        <n>yarn.nodemanager.aux-services</n>
+        <value>mapreduce_shuffle</value>
+    </property>
+    
+    <property>
+        <n>yarn.nodemanager.aux-services.mapreduce_shuffle.class</n>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    
+    <property>
+        <n>yarn.nodemanager.resource.memory-mb</n>
+        <value>2048</value>
+    </property>
+    
+    <property>
+        <n>yarn.nodemanager.resource.cpu-vcores</n>
+        <value>2</value>
+    </property>
+    
+    <property>
+        <n>yarn.scheduler.maximum-allocation-mb</n>
+        <value>2048</value>
+    </property>
+    
+    <property>
+        <n>yarn.scheduler.minimum-allocation-mb</n>
+        <value>512</value>
+    </property>
+</configuration>
