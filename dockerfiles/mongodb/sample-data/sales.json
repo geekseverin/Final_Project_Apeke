@@ -1,0 +1,17 @@
+[
+  {"id": "s001", "product": "Laptop Dell XPS", "quantity": 1, "price": 1299.99, "date": "2024-01-15", "customer_id": "c001"},
+  {"id": "s002", "product": "iPhone 15", "quantity": 2, "price": 999.99, "date": "2024-01-16", "customer_id": "c002"},
+  {"id": "s003", "product": "Samsung Galaxy S24", "quantity": 1, "price": 899.99, "date": "2024-01-17", "customer_id": "c003"},
+  {"id": "s004", "product": "MacBook Pro", "quantity": 1, "price": 2299.99, "date": "2024-01-18", "customer_id": "c004"},
+  {"id": "s005", "product": "iPad Air", "quantity": 3, "price": 649.99, "date": "2024-01-19", "customer_id": "c005"},
+  {"id": "s006", "product": "AirPods Pro", "quantity": 2, "price": 279.99, "date": "2024-01-20", "customer_id": "c001"},
+  {"id": "s007", "product": "Laptop Dell XPS", "quantity": 1, "price": 1299.99, "date": "2024-01-21", "customer_id": "c006"},
+  {"id": "s008", "product": "Samsung Galaxy S24", "quantity": 2, "price": 899.99, "date": "2024-01-22", "customer_id": "c007"},
+  {"id": "s009", "product": "iPhone 15", "quantity": 1, "price": 999.99, "date": "2024-01-23", "customer_id": "c008"},
+  {"id": "s010", "product": "MacBook Pro", "quantity": 1, "price": 2299.99, "date": "2024-01-24", "customer_id": "c009"},
+  {"id": "s011", "product": "AirPods Pro", "quantity": 4, "price": 279.99, "date": "2024-01-25", "customer_id": "c010"},
+  {"id": "s012", "product": "iPad Air", "quantity": 1, "price": 649.99, "date": "2024-01-26", "customer_id": "c002"},
+  {"id": "s013", "product": "Laptop Dell XPS", "quantity": 2, "price": 1299.99, "date": "2024-01-27", "customer_id": "c003"},
+  {"id": "s014", "product": "iPhone 15", "quantity": 1, "price": 999.99, "date": "2024-01-28", "customer_id": "c011"},
+  {"id": "s015", "product": "Samsung Galaxy S24", "quantity": 3, "price": 899.99, "date": "2024-01-29", "customer_id": "c012"}
+]
