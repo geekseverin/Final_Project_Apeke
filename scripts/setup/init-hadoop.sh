@@ -11,7 +11,7 @@ cp /config/hadoop/* $HADOOP_CONF_DIR/
 cp /config/spark/* $SPARK_CONF_DIR/
 
 # Démarrer SSH
-sudo service ssh start
+service ssh start
 
 # Fonction pour attendre qu'un service soit prêt
 wait_for_service() {

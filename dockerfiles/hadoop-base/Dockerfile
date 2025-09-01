@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     netcat \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Variables d'environnement
