@@ -9,7 +9,7 @@ cp /config/hadoop/* $HADOOP_CONF_DIR/
 cp /config/spark/* $SPARK_CONF_DIR/ 2>/dev/null || true
 
 # Démarrer SSH
-service ssh start
+#service ssh start
 
 # Initialiser Spark
 /scripts/setup/init-spark.sh

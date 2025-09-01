@@ -14,10 +14,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Variables d'environnement
+
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV HADOOP_VERSION=3.3.4
 ENV SPARK_VERSION=3.4.1
 ENV PIG_VERSION=0.17.0
+
+
+# AJOUTER CETTE LIGNE pour créer le répertoire SSH
+RUN mkdir -p /run/sshd
 
 # Créer utilisateur hadoop
 RUN useradd -m -s /bin/bash hadoop && \

@@ -1,32 +1,32 @@
 <?xml version="1.0"?>
 <configuration>
     <property>
-        <n>mapreduce.framework.name</n>
+        <name>mapreduce.framework.name</name>
         <value>yarn</value>
     </property>
     
     <property>
-        <n>mapreduce.application.classpath</n>
+        <name>mapreduce.application.classpath</name>
         <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
     </property>
     
     <property>
-        <n>mapreduce.map.memory.mb</n>
+        <name>mapreduce.map.memory.mb</name>
         <value>1024</value>
     </property>
     
     <property>
-        <n>mapreduce.reduce.memory.mb</n>
+        <name>mapreduce.reduce.memory.mb</name>
         <value>1024</value>
     </property>
     
     <property>
-        <n>mapreduce.map.java.opts</n>
+        <name>mapreduce.map.java.opts</name>
         <value>-Xmx768m</value>
     </property>
     
     <property>
-        <n>mapreduce.reduce.java.opts</n>
+        <name>mapreduce.reduce.java.opts</name>
         <value>-Xmx768m</value>
     </property>
 </configuration>
