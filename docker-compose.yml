@@ -1,11 +1,4 @@
 services:
-  # Base image pour Hadoop (doit être construite en premier)
-  hadoop-base:
-    build:
-      context: ./dockerfiles/hadoop-base
-    image: bigdata-project_hadoop-base:latest
-    command: ["echo", "Base image built"]
-
   # Master Node (NameNode, ResourceManager, Spark Master)
   hadoop-master:
     build: 
@@ -24,10 +17,9 @@ services:
     environment:
       - HADOOP_ROLE=master
       - CLUSTER_NAME=bigdata-cluster
+      - JAVA_HOME=/usr/local/openjdk-8
     networks:
       - bigdata-net
-    depends_on:
-      - hadoop-base
     command: ["/scripts/setup/init-hadoop.sh", "master"]
 
   # Secondary Master Node (SecondaryNameNode)
@@ -45,6 +37,7 @@ services:
     environment:
       - HADOOP_ROLE=secondary
       - CLUSTER_NAME=bigdata-cluster
+      - JAVA_HOME=/usr/local/openjdk-8
     networks:
       - bigdata-net
     depends_on:
@@ -67,6 +60,7 @@ services:
       - HADOOP_ROLE=worker
       - WORKER_ID=1
       - CLUSTER_NAME=bigdata-cluster
+      - JAVA_HOME=/usr/local/openjdk-8
     networks:
       - bigdata-net
     depends_on:
@@ -89,6 +83,7 @@ services:
       - HADOOP_ROLE=worker
       - WORKER_ID=2
       - CLUSTER_NAME=bigdata-cluster
+      - JAVA_HOME=/usr/local/openjdk-8
     networks:
       - bigdata-net
     depends_on:
@@ -111,6 +106,7 @@ services:
       - HADOOP_ROLE=worker
       - WORKER_ID=3
       - CLUSTER_NAME=bigdata-cluster
+      - JAVA_HOME=/usr/local/openjdk-8
     networks:
       - bigdata-net
     depends_on:

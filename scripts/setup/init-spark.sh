@@ -7,6 +7,12 @@ set -e
 
 echo "Initialisation d'Apache Spark..."
 
+# Détecter JAVA_HOME automatiquement si nécessaire
+if [ -z "$JAVA_HOME" ] || [ ! -d "$JAVA_HOME" ]; then
+    export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+    echo "JAVA_HOME détecté automatiquement: $JAVA_HOME"
+fi
+
 # Variables d'environnement
 export SPARK_HOME=/opt/spark
 export HADOOP_HOME=/opt/hadoop
@@ -21,12 +27,12 @@ if [ -f "/config/spark/spark-defaults.conf" ]; then
     echo "Configuration Spark copiée"
 fi
 
-# Créer spark-env.sh
+# Créer spark-env.sh avec le bon JAVA_HOME
 cat > $SPARK_CONF_DIR/spark-env.sh << EOF
 #!/usr/bin/env bash
 
 # Java Home
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_HOME=$JAVA_HOME
 
 # Hadoop Configuration
 export HADOOP_HOME=/opt/hadoop

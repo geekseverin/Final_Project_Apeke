@@ -13,16 +13,14 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Variables d'environnement
+# Créer le répertoire SSH
+RUN mkdir -p /run/sshd
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+# Variables d'environnement - JAVA_HOME CORRIGÉ
+ENV JAVA_HOME=/usr/local/openjdk-8
 ENV HADOOP_VERSION=3.3.4
 ENV SPARK_VERSION=3.4.1
 ENV PIG_VERSION=0.17.0
-
-
-# AJOUTER CETTE LIGNE pour créer le répertoire SSH
-RUN mkdir -p /run/sshd
 
 # Créer utilisateur hadoop
 RUN useradd -m -s /bin/bash hadoop && \
@@ -62,6 +60,7 @@ ENV PATH=${PATH}:${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPAR
 RUN mkdir -p /hadoop/data/namenode && \
     mkdir -p /hadoop/data/datanode && \
     mkdir -p /hadoop/data/secondary && \
+    mkdir -p /hadoop/data/tmp && \
     chown -R hadoop:hadoop /hadoop
 
 # Télécharger MongoDB Hadoop Connector

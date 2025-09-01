@@ -10,5 +10,6 @@
   {"id": "c009", "name": "Isabelle Girard", "email": "isabelle.girard@email.com", "city": "Paris", "age": 29},
   {"id": "c010", "name": "Julien Morel", "email": "julien.morel@email.com", "city": "Bordeaux", "age": 37},
   {"id": "c011", "name": "Karine Fournier", "email": "karine.fournier@email.com", "city": "Marseille", "age": 41},
-  {"id": "c012", "name": "Laurent Simon", "email": "laurent.simon@email.com", "city": "Toulouse", "age": 34}
+  {"id": "c012", "name": "Laurent Simon", "email": "laurent.simon@email.com", "city": "Toulouse", "age": 34},
+  {"id": "c013", "name": "Severin", "email": "geek.simon@email.com", "city": "Toulouse", "age": 25}
 ]
