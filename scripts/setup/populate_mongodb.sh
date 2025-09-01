@@ -37,7 +37,7 @@ mongoimport --host mongodb:27017 \
 echo "Données clients importées"
 
 # Vérifier l'import
-mongo mongodb://admin:password123@mongodb:27017/bigdata?authSource=admin --eval "
+mongosh mongodb://admin:password123@mongodb:27017/bigdata?authSource=admin --eval "
     print('=== Vérification des données ===');
     print('Nombre de ventes: ' + db.sales.count());
     print('Nombre de clients: ' + db.customers.count());
