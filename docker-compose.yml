@@ -1,6 +1,11 @@
-version: '3.8'
-
 services:
+  # Base image pour Hadoop (doit être construite en premier)
+  hadoop-base:
+    build:
+      context: ./dockerfiles/hadoop-base
+    image: bigdata-project_hadoop-base:latest
+    command: ["echo", "Base image built"]
+
   # Master Node (NameNode, ResourceManager, Spark Master)
   hadoop-master:
     build: 
@@ -21,6 +26,8 @@ services:
       - CLUSTER_NAME=bigdata-cluster
     networks:
       - bigdata-net
+    depends_on:
+      - hadoop-base
     command: ["/scripts/setup/init-hadoop.sh", "master"]
 
   # Secondary Master Node (SecondaryNameNode)

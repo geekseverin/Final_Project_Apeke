@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     vim \
     python3 \
     python3-pip \
+    netcat \
     && rm -rf /var/lib/apt/lists/*
 
 # Variables d'environnement
@@ -51,11 +52,6 @@ ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 ENV SPARK_CONF_DIR=${SPARK_HOME}/conf
 ENV PATH=${PATH}:${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PIG_HOME}/bin
 
-# Configurer SSH pour Hadoop
-RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-    chmod 0600 ~/.ssh/authorized_keys
-
 # Créer les répertoires de données
 RUN mkdir -p /hadoop/data/namenode && \
     mkdir -p /hadoop/data/datanode && \
@@ -66,11 +62,20 @@ RUN mkdir -p /hadoop/data/namenode && \
 RUN wget https://repo1.maven.org/maven2/org/mongodb/mongo-hadoop/mongo-hadoop-core/2.0.2/mongo-hadoop-core-2.0.2.jar -O /opt/hadoop/share/hadoop/common/lib/mongo-hadoop-core-2.0.2.jar && \
     wget https://repo1.maven.org/maven2/org/mongodb/mongodb-driver/3.12.11/mongodb-driver-3.12.11.jar -O /opt/hadoop/share/hadoop/common/lib/mongodb-driver-3.12.11.jar
 
+# Passer à l'utilisateur hadoop
 USER hadoop
 WORKDIR /home/hadoop
 
+# Créer le répertoire .ssh et configurer SSH pour l'utilisateur hadoop
+RUN mkdir -p ~/.ssh && \
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
+    chmod 0600 ~/.ssh/authorized_keys && \
+    chmod 700 ~/.ssh
+
 # Configuration SSH
 RUN echo "StrictHostKeyChecking no" >> ~/.ssh/config && \
-    echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config
+    echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config && \
+    chmod 600 ~/.ssh/config
 
 EXPOSE 9870 8088 8080 7077

@@ -1,4 +1,4 @@
-FROM bigdata-project_hadoop-base:latest
+FROM hadoop-base:local
 
 USER root
 
