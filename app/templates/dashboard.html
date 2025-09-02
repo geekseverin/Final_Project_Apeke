@@ -31,19 +31,19 @@
                 <h3>📊 Métriques Générales</h3>
                 <div class="metrics">
                     <div class="metric">
-                        <span class="metric-value" id="total-sales">Loading...</span>
+                        <span class="metric-value" id="total-sales">-</span>
                         <span class="metric-label">Total Ventes</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-value" id="total-customers">Loading...</span>
+                        <span class="metric-value" id="total-customers">-</span>
                         <span class="metric-label">Clients</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-value" id="total-revenue">Loading...</span>
+                        <span class="metric-value" id="total-revenue">-</span>
                         <span class="metric-label">Chiffre d'Affaires</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-value" id="top-product">Loading...</span>
+                        <span class="metric-value" id="top-product">-</span>
                         <span class="metric-label">Produit Star</span>
                     </div>
                 </div>
@@ -52,34 +52,29 @@
             <!-- Analyse des produits -->
             <div class="card">
                 <h3>🛍️ Top Produits</h3>
-                <div id="product-status" class="loading">Chargement des données produits...</div>
-                <canvas id="productChart" width="400" height="200" style="display:none;"></canvas>
+                <canvas id="productChart" width="400" height="200"></canvas>
                 <div id="product-table" class="data-table"></div>
             </div>
 
             <!-- Analyse des villes -->
             <div class="card">
                 <h3>🌍 Revenus par Ville</h3>
-                <div id="city-status" class="loading">Chargement des données villes...</div>
-                <canvas id="cityChart" width="400" height="200" style="display:none;"></canvas>
+                <canvas id="cityChart" width="400" height="200"></canvas>
                 <div id="city-table" class="data-table"></div>
             </div>
 
-            <!-- Informations système CORRIGÉ -->
+            <!-- Informations système -->
             <div class="card">
                 <h3>⚙️ Informations Système</h3>
                 <div class="system-info">
                     <div class="info-item">
-                        <strong>Hadoop HDFS:</strong> <span id="hadoop-status">Checking...</span>
+                        <strong>Hadoop:</strong> <span id="hadoop-status">-</span>
                     </div>
                     <div class="info-item">
-                        <strong>Yarn:</strong> <span id="yarn-status">Checking...</span>
+                        <strong>Spark:</strong> <span id="spark-status">-</span>
                     </div>
                     <div class="info-item">
-                        <strong>Spark:</strong> <span id="spark-status">Checking...</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>MongoDB:</strong> <span id="mongodb-status">Checking...</span>
+                        <strong>MongoDB:</strong> <span id="mongodb-status">-</span>
                     </div>
                 </div>
                 
@@ -89,26 +84,19 @@
                     <a href="http://localhost:8088" target="_blank">Yarn</a>
                     <a href="http://localhost:8080" target="_blank">Spark Master</a>
                 </div>
-            </div>
 
-            <!-- État des analyses CORRIGÉ -->
-            <div class="card">
-                <h3>📊 État des Analyses</h3>
-                <div class="system-info">
-                    <div class="info-item">
-                        <strong>Analyse Pig:</strong> <span id="pig-analysis-status">Checking...</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Analyse Spark:</strong> <span id="spark-analysis-status">Checking...</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Données brutes:</strong> <span id="raw-data-status">Checking...</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Données traitées:</strong> <span id="processed-data-status">Checking...</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>Données HDFS:</strong> <span id="hdfs-data-status">Checking...</span>
+                <div class="card">
+                    <h3>📊 État des Analyses</h3>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <strong>Analyse Pig:</strong> <span id="pig-status">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Analyse Spark:</strong> <span id="spark-status">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Données brutes:</strong> <span id="raw-data-status">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -119,71 +107,33 @@
         // Variables globales pour les graphiques
         let productChart = null;
         let cityChart = null;
-        let refreshInterval = null;
 
-        // CORRIGÉ: Fonction pour charger les données générales
+        // Fonction pour charger les données générales
         async function loadSummaryData() {
             try {
-                console.log('Chargement des métriques générales...');
                 const response = await fetch('/api/sales-summary');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
                 
-                document.getElementById('total-sales').textContent = data.total_sales || '0';
-                document.getElementById('total-customers').textContent = data.total_customers || '0';
-                document.getElementById('total-revenue').textContent = `${data.total_revenue || 0}€`;
-                document.getElementById('top-product').textContent = data.top_product?.name || 'N/A';
-                
-                console.log('Métriques générales chargées:', data);
+                document.getElementById('total-sales').textContent = data.total_sales;
+                document.getElementById('total-customers').textContent = data.total_customers;
+                document.getElementById('total-revenue').textContent = `${data.total_revenue}€`;
+                document.getElementById('top-product').textContent = data.top_product.name;
             } catch (error) {
                 console.error('Erreur chargement résumé:', error);
-                document.getElementById('total-sales').textContent = 'Error';
-                document.getElementById('total-customers').textContent = 'Error';
-                document.getElementById('total-revenue').textContent = 'Error';
-                document.getElementById('top-product').textContent = 'Error';
             }
         }
 
-        // CORRIGÉ: Fonction pour charger l'analyse des produits
+        // Fonction pour charger l'analyse des produits
         async function loadProductAnalysis() {
-            const statusDiv = document.getElementById('product-status');
-            const chartCanvas = document.getElementById('productChart');
-            const tableDiv = document.getElementById('product-table');
-            
             try {
-                statusDiv.textContent = 'Chargement des données produits...';
-                statusDiv.className = 'loading';
-                
-                console.log('Chargement analyse produits...');
                 const response = await fetch('/api/product-analysis');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
-                console.log('Données produits reçues:', data);
-                
-                if (!data || data.length === 0) {
-                    statusDiv.textContent = 'Aucune donnée produit disponible';
-                    statusDiv.className = 'error';
-                    chartCanvas.style.display = 'none';
-                    return;
-                }
-                
-                // Masquer le statut et afficher le graphique
-                statusDiv.style.display = 'none';
-                chartCanvas.style.display = 'block';
                 
                 // Prendre les 5 premiers produits
                 const topProducts = data.slice(0, 5);
                 
                 // Créer le graphique
-                const ctx = chartCanvas.getContext('2d');
+                const ctx = document.getElementById('productChart').getContext('2d');
                 if (productChart) productChart.destroy();
                 
                 productChart = new Chart(ctx, {
@@ -192,7 +142,7 @@
                         labels: topProducts.map(p => p.product),
                         datasets: [{
                             label: 'Revenus (€)',
-                            data: topProducts.map(p => p.total_revenue || 0),
+                            data: topProducts.map(p => p.total_revenue),
                             backgroundColor: 'rgba(54, 162, 235, 0.6)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1
@@ -200,7 +150,6 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
                         scales: {
                             y: {
                                 beginAtZero: true
@@ -210,61 +159,30 @@
                 });
 
                 // Créer le tableau
-                let tableHTML = '<table><thead><tr><th>Produit</th><th>Ventes</th><th>Quantité</th><th>Revenus</th></tr></thead><tbody>';
+                let tableHTML = '<table><thead><tr><th>Produit</th><th>Ventes</th><th>Revenus</th></tr></thead><tbody>';
                 topProducts.forEach(product => {
                     tableHTML += `<tr>
                         <td>${product.product}</td>
-                        <td>${product.total_sales || 0}</td>
-                        <td>${product.total_quantity || 0}</td>
-                        <td>${(product.total_revenue || 0).toFixed(2)}€</td>
+                        <td>${product.total_sales}</td>
+                        <td>${product.total_revenue.toFixed(2)}€</td>
                     </tr>`;
                 });
                 tableHTML += '</tbody></table>';
-                tableDiv.innerHTML = tableHTML;
-                
-                console.log('Analyse produits chargée avec succès');
+                document.getElementById('product-table').innerHTML = tableHTML;
                 
             } catch (error) {
                 console.error('Erreur chargement analyse produits:', error);
-                statusDiv.textContent = `Erreur: ${error.message}`;
-                statusDiv.className = 'error';
-                chartCanvas.style.display = 'none';
             }
         }
 
-        // CORRIGÉ: Fonction pour charger l'analyse des villes
+        // Fonction pour charger l'analyse des villes
         async function loadCityAnalysis() {
-            const statusDiv = document.getElementById('city-status');
-            const chartCanvas = document.getElementById('cityChart');
-            const tableDiv = document.getElementById('city-table');
-            
             try {
-                statusDiv.textContent = 'Chargement des données villes...';
-                statusDiv.className = 'loading';
-                
-                console.log('Chargement analyse villes...');
                 const response = await fetch('/api/city-analysis');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
-                console.log('Données villes reçues:', data);
-                
-                if (!data || data.length === 0) {
-                    statusDiv.textContent = 'Aucune donnée ville disponible';
-                    statusDiv.className = 'error';
-                    chartCanvas.style.display = 'none';
-                    return;
-                }
-                
-                // Masquer le statut et afficher le graphique
-                statusDiv.style.display = 'none';
-                chartCanvas.style.display = 'block';
                 
                 // Créer le graphique
-                const ctx = chartCanvas.getContext('2d');
+                const ctx = document.getElementById('cityChart').getContext('2d');
                 if (cityChart) cityChart.destroy();
                 
                 cityChart = new Chart(ctx, {
@@ -272,7 +190,7 @@
                     data: {
                         labels: data.map(c => c.city),
                         datasets: [{
-                            data: data.map(c => c.city_revenue || 0),
+                            data: data.map(c => c.city_revenue),
                             backgroundColor: [
                                 '#FF6384',
                                 '#36A2EB',
@@ -285,7 +203,6 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 position: 'bottom'
@@ -299,180 +216,78 @@
                 data.forEach(city => {
                     tableHTML += `<tr>
                         <td>${city.city}</td>
-                        <td>${city.total_transactions || 0}</td>
-                        <td>${(city.city_revenue || 0).toFixed(2)}€</td>
+                        <td>${city.total_transactions}</td>
+                        <td>${city.city_revenue.toFixed(2)}€</td>
                     </tr>`;
                 });
                 tableHTML += '</tbody></table>';
-                tableDiv.innerHTML = tableHTML;
-                
-                console.log('Analyse villes chargée avec succès');
+                document.getElementById('city-table').innerHTML = tableHTML;
                 
             } catch (error) {
                 console.error('Erreur chargement analyse villes:', error);
-                statusDiv.textContent = `Erreur: ${error.message}`;
-                statusDiv.className = 'error';
-                chartCanvas.style.display = 'none';
             }
         }
 
-        // CORRIGÉ: Fonction pour charger le statut du cluster
+        // Fonction pour charger le statut du cluster
         async function loadClusterStatus() {
             try {
-                console.log('Vérification statut cluster...');
                 const response = await fetch('/api/cluster-status');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
-                console.log('Statut cluster reçu:', data);
                 
                 document.getElementById('cluster-status').textContent = 'Online ✅';
-                document.getElementById('hadoop-status').textContent = data.hadoop_status || 'Unknown ❓';
-                document.getElementById('yarn-status').textContent = data.yarn_status || 'Unknown ❓';
-                document.getElementById('spark-status').textContent = data.spark_status || 'Unknown ❓';
-                document.getElementById('mongodb-status').textContent = data.mongodb_status || 'Unknown ❓';
+                document.getElementById('hadoop-status').textContent = data.hadoop_status;
+                document.getElementById('spark-status').textContent = data.spark_status;
+                document.getElementById('mongodb-status').textContent = data.mongodb_status;
                 document.getElementById('last-update').textContent = new Date(data.last_update).toLocaleString();
                 
             } catch (error) {
                 console.error('Erreur statut cluster:', error);
                 document.getElementById('cluster-status').textContent = 'Offline ❌';
-                document.getElementById('hadoop-status').textContent = 'Error ❌';
-                document.getElementById('yarn-status').textContent = 'Error ❌';
-                document.getElementById('spark-status').textContent = 'Error ❌';
-                document.getElementById('mongodb-status').textContent = 'Error ❌';
             }
         }
 
-        // CORRIGÉ: Fonction pour charger l'état des analyses
+        // Fonction de rafraîchissement automatique
+        function refreshDashboard() {
+            loadSummaryData();
+            loadProductAnalysis();
+            loadCityAnalysis();
+            loadClusterStatus();
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDashboard();
+            
+            // Rafraîchir toutes les 30 secondes
+            setInterval(refreshDashboard, 30000);
+        });
+
+        // Fonction pour charger l'état des analyses
         async function loadAnalysisStatus() {
             try {
-                console.log('Vérification statut analyses...');
                 const response = await fetch('/api/analysis-status');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
-                console.log('Statut analyses reçu:', data);
                 
-                document.getElementById('pig-analysis-status').textContent = 
+                document.getElementById('pig-status').textContent = 
                     data.pig_analysis_available ? 'Disponible ✅' : 'Non disponible ❌';
-                document.getElementById('spark-analysis-status').textContent = 
+                document.getElementById('spark-status').textContent = 
                     data.spark_analysis_available ? 'Disponible ✅' : 'Non disponible ❌';
                 document.getElementById('raw-data-status').textContent = 
                     data.raw_data_available ? 'Disponible ✅' : 'Non disponible ❌';
-                document.getElementById('processed-data-status').textContent = 
-                    data.processed_data_available ? 'Disponible ✅' : 'Non disponible ❌';
-                document.getElementById('hdfs-data-status').textContent = 
-                    data.hdfs_data_available ? 'Disponible ✅' : 'Non disponible ❌';
                     
             } catch (error) {
                 console.error('Erreur statut analyses:', error);
-                document.getElementById('pig-analysis-status').textContent = 'Error ❌';
-                document.getElementById('spark-analysis-status').textContent = 'Error ❌';
-                document.getElementById('raw-data-status').textContent = 'Error ❌';
-                document.getElementById('processed-data-status').textContent = 'Error ❌';
-                document.getElementById('hdfs-data-status').textContent = 'Error ❌';
             }
         }
 
-        // CORRIGÉ: Fonction de rafraîchissement complète
-        async function refreshDashboard() {
-            console.log('🔄 Rafraîchissement du dashboard...');
-            try {
-                await Promise.all([
-                    loadSummaryData(),
-                    loadProductAnalysis(),
-                    loadCityAnalysis(),
-                    loadClusterStatus(),
-                    loadAnalysisStatus()
-                ]);
-                console.log('✅ Dashboard rafraîchi avec succès');
-            } catch (error) {
-                console.error('❌ Erreur lors du rafraîchissement:', error);
-            }
+        // Ajoutez cet appel dans la fonction refreshDashboard
+        function refreshDashboard() {
+            loadSummaryData();
+            loadProductAnalysis();
+            loadCityAnalysis();
+            loadClusterStatus();
+            loadAnalysisStatus(); // AJOUTEZ CETTE LIGNE
         }
-
-        // Fonction pour démarrer le rafraîchissement automatique
-        function startAutoRefresh(intervalSeconds = 30) {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            
-            refreshInterval = setInterval(() => {
-                console.log('Auto-refresh triggered');
-                refreshDashboard();
-            }, intervalSeconds * 1000);
-            
-            console.log(`Auto-refresh configuré toutes les ${intervalSeconds} secondes`);
-        }
-
-        // Fonction pour arrêter le rafraîchissement automatique
-        function stopAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-                refreshInterval = null;
-                console.log('Auto-refresh arrêté');
-            }
-        }
-
-        // CORRIGÉ: Initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initialisation du dashboard...');
-            
-            // Rafraîchissement initial
-            refreshDashboard();
-            
-            // Démarrer le rafraîchissement automatique
-            startAutoRefresh(30);
-            
-            // Gérer la visibilité de la page pour optimiser les performances
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    console.log('Page cachée - arrêt auto-refresh');
-                    stopAutoRefresh();
-                } else {
-                    console.log('Page visible - reprise auto-refresh');
-                    refreshDashboard();
-                    startAutoRefresh(30);
-                }
-            });
-            
-            // Bouton de rafraîchissement manuel (optionnel)
-            const header = document.querySelector('header');
-            const refreshButton = document.createElement('button');
-            refreshButton.textContent = '🔄 Actualiser';
-            refreshButton.style.cssText = `
-                background: rgba(255,255,255,0.2);
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
-                cursor: pointer;
-                margin-top: 10px;
-                font-size: 0.9rem;
-            `;
-            refreshButton.onclick = () => {
-                refreshButton.textContent = '🔄 Actualisation...';
-                refreshDashboard().finally(() => {
-                    refreshButton.textContent = '🔄 Actualiser';
-                });
-            };
-            header.appendChild(refreshButton);
-        });
-
-        // Gestion des erreurs globales
-        window.addEventListener('error', function(e) {
-            console.error('Erreur JavaScript:', e.error);
-        });
-
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Promise rejetée:', e.reason);
-        });
     </script>
 </body>
 </html>
