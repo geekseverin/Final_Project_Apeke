@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Application Web Flask pour visualiser les résultats d'analyse Big Data
+Application Web Flask pour visualiser les résultats d'analyse Big Data (CORRIGÉE)
 Projet Big Data - Traitement Distribué 2024-2025
 """
 
@@ -10,6 +10,7 @@ import pandas as pd
 import json
 from datetime import datetime
 import os
+import subprocess
 
 app = Flask(__name__)
 
@@ -39,6 +40,47 @@ def get_collection_data(collection_name):
         return data
     except Exception as e:
         print(f"Erreur lors de la récupération de {collection_name}: {e}")
+        return []
+
+def read_hdfs_analysis_results(analysis_type):
+    """Lire les résultats d'analyse depuis HDFS"""
+    try:
+        hdfs_path = f"hdfs://hadoop-master:9000/pig-output/{analysis_type}"
+        
+        # Utiliser hdfs dfs -cat pour lire le fichier
+        result = subprocess.run([
+            'docker', 'exec', 'hadoop-master', 
+            'hdfs', 'dfs', '-cat', f'{hdfs_path}/part-r-00000'
+        ], capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            # Parser les données CSV
+            lines = result.stdout.strip().split('\n')
+            data = []
+            for line in lines:
+                if line.strip():
+                    parts = line.split(',')
+                    if analysis_type == 'product-analysis' and len(parts) >= 5:
+                        data.append({
+                            'product': parts[0],
+                            'total_sales': int(parts[1]),
+                            'total_quantity': int(parts[2]),
+                            'avg_price': float(parts[3]),
+                            'total_revenue': float(parts[4])
+                        })
+                    elif analysis_type == 'city-revenue' and len(parts) >= 3:
+                        data.append({
+                            'city': parts[0],
+                            'total_transactions': int(parts[1]),
+                            'city_revenue': float(parts[2])
+                        })
+            return data
+        else:
+            print(f"Erreur lecture HDFS {analysis_type}: {result.stderr}")
+            return []
+            
+    except Exception as e:
+        print(f"Erreur lecture analyse HDFS {analysis_type}: {e}")
         return []
 
 @app.route('/')
@@ -82,15 +124,23 @@ def sales_summary():
 
 @app.route('/api/product-analysis')
 def product_analysis():
-    """API pour l'analyse des produits"""
+    """API pour l'analyse des produits (depuis résultats Pig)"""
     try:
-        # Essayer de récupérer depuis la collection d'analyse Spark
-        analysis_data = get_collection_data('product_analysis')
+        # D'abord essayer de lire les résultats d'analyse Pig depuis HDFS
+        pig_results = read_hdfs_analysis_results('product-analysis')
         
+        if pig_results:
+            print("Utilisation des résultats d'analyse Pig depuis HDFS")
+            return jsonify(pig_results)
+        
+        # Fallback : essayer depuis MongoDB (résultats Spark)
+        analysis_data = get_collection_data('product_analysis')
         if analysis_data:
+            print("Utilisation des résultats d'analyse Spark depuis MongoDB")
             return jsonify(analysis_data)
         
-        # Sinon, calculer à partir des données brutes
+        # Fallback final : calculer à partir des données brutes
+        print("Calcul à partir des données brutes MongoDB")
         sales_data = get_collection_data('sales')
         
         product_stats = {}
@@ -125,8 +175,17 @@ def product_analysis():
 
 @app.route('/api/city-analysis')
 def city_analysis():
-    """API pour l'analyse par ville"""
+    """API pour l'analyse par ville (depuis résultats Pig)"""
     try:
+        # D'abord essayer de lire les résultats d'analyse Pig depuis HDFS
+        pig_results = read_hdfs_analysis_results('city-revenue')
+        
+        if pig_results:
+            print("Utilisation des résultats d'analyse Pig depuis HDFS")
+            return jsonify(pig_results)
+        
+        # Fallback : calculer à partir des données brutes
+        print("Calcul à partir des données brutes MongoDB")
         customers_data = get_collection_data('customers')
         sales_data = get_collection_data('sales')
         
@@ -159,6 +218,33 @@ def city_analysis():
         
         result.sort(key=lambda x: x['city_revenue'], reverse=True)
         return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analysis-status')
+def analysis_status():
+    """API pour vérifier l'état des analyses"""
+    try:
+        status = {
+            'pig_analysis_available': False,
+            'spark_analysis_available': False,
+            'raw_data_available': False
+        }
+        
+        # Vérifier si les résultats Pig sont disponibles dans HDFS
+        pig_results = read_hdfs_analysis_results('product-analysis')
+        status['pig_analysis_available'] = len(pig_results) > 0
+        
+        # Vérifier si les résultats Spark sont disponibles dans MongoDB
+        spark_results = get_collection_data('product_analysis')
+        status['spark_analysis_available'] = len(spark_results) > 0
+        
+        # Vérifier si les données brutes sont disponibles
+        raw_sales = get_collection_data('sales')
+        status['raw_data_available'] = len(raw_sales) > 0
+        
+        return jsonify(status)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

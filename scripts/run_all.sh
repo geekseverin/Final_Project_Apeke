@@ -91,6 +91,15 @@ docker exec hadoop-master hdfs dfs -chmod 777 /pig-output
 docker exec hadoop-master hdfs dfs -chmod 777 /spark-output
 log_success "Répertoires HDFS créés"
 
+# 4.5. Transférer les données MongoDB vers HDFS
+log_info "Transfert des données MongoDB vers HDFS..."
+/transfer_mongodb_to_hdfs.sh
+if [ $? -eq 0 ]; then
+    log_success "Données transférées vers HDFS"
+else
+    log_error "Erreur lors du transfert vers HDFS"
+fi
+
 # 5. Exécuter l'analyse Pig
 log_info "Exécution de l'analyse Apache Pig..."
 docker exec hadoop-master pig -f /scripts/pig/data_analysis.pig

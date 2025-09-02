@@ -84,6 +84,21 @@
                     <a href="http://localhost:8088" target="_blank">Yarn</a>
                     <a href="http://localhost:8080" target="_blank">Spark Master</a>
                 </div>
+
+                <div class="card">
+                    <h3>📊 État des Analyses</h3>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <strong>Analyse Pig:</strong> <span id="pig-status">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Analyse Spark:</strong> <span id="spark-status">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Données brutes:</strong> <span id="raw-data-status">-</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -246,6 +261,33 @@
             // Rafraîchir toutes les 30 secondes
             setInterval(refreshDashboard, 30000);
         });
+
+        // Fonction pour charger l'état des analyses
+        async function loadAnalysisStatus() {
+            try {
+                const response = await fetch('/api/analysis-status');
+                const data = await response.json();
+                
+                document.getElementById('pig-status').textContent = 
+                    data.pig_analysis_available ? 'Disponible ✅' : 'Non disponible ❌';
+                document.getElementById('spark-status').textContent = 
+                    data.spark_analysis_available ? 'Disponible ✅' : 'Non disponible ❌';
+                document.getElementById('raw-data-status').textContent = 
+                    data.raw_data_available ? 'Disponible ✅' : 'Non disponible ❌';
+                    
+            } catch (error) {
+                console.error('Erreur statut analyses:', error);
+            }
+        }
+
+        // Ajoutez cet appel dans la fonction refreshDashboard
+        function refreshDashboard() {
+            loadSummaryData();
+            loadProductAnalysis();
+            loadCityAnalysis();
+            loadClusterStatus();
+            loadAnalysisStatus(); // AJOUTEZ CETTE LIGNE
+        }
     </script>
 </body>
 </html>

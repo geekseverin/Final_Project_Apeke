@@ -13,5 +13,6 @@
   {"id": "s012", "product": "iPad Air", "quantity": 1, "price": 649.99, "date": "2024-01-26", "customer_id": "c002"},
   {"id": "s013", "product": "Laptop Dell XPS", "quantity": 2, "price": 1299.99, "date": "2024-01-27", "customer_id": "c003"},
   {"id": "s014", "product": "iPhone 15", "quantity": 1, "price": 999.99, "date": "2024-01-28", "customer_id": "c011"},
-  {"id": "s015", "product": "Samsung Galaxy S24", "quantity": 3, "price": 899.99, "date": "2024-01-29", "customer_id": "c012"}
+  {"id": "s015", "product": "Samsung Galaxy S24", "quantity": 3, "price": 899.99, "date": "2024-01-29", "customer_id": "c012"},
+  {"id": "s016", "product": "Samsung Galaxy S24", "quantity": 3, "price": 899.99, "date": "2024-02-29", "customer_id": "c013s"}
 ]
