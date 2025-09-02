@@ -4,6 +4,7 @@ Script Spark pour lire des données depuis HDFS (au lieu de MongoDB directement)
 Projet Big Data - Traitement Distribué 2024-2025
 """
 
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
