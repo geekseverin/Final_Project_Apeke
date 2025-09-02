@@ -1,19 +1,21 @@
--- Script d'analyse exploratoire avec Apache Pig (VERSION CORRIGÉE)
+-- Script d'analyse exploratoire avec Apache Pig (VERSION CORRIGÉE SANS JSON)
 -- Projet Big Data - Traitement Distribué 2024-2025
 
--- Enregistrer les UDF nécessaires
-REGISTER /opt/pig/lib/piggybank.jar;
-DEFINE JsonLoader org.apache.pig.piggybank.storage.JsonLoader();
+-- 1. CONVERSION DES DONNÉES JSON EN CSV DANS HDFS PUIS CHARGEMENT
+-- Cette approche évite les problèmes de JsonLoader
 
--- 1. CHARGEMENT DES DONNÉES DEPUIS HDFS
--- Vérifier d'abord que les fichiers existent
+-- Script pour vérifier l'existence des données
 fs -ls /data/;
 
--- Chargement des données de ventes depuis HDFS
-sales_raw = LOAD '/data/sales.json' USING JsonLoader('id:chararray, product:chararray, quantity:int, price:double, date:chararray, customer_id:chararray');
+-- Chargement des données de ventes depuis CSV converti
+-- Format: id,product,quantity,price,date,customer_id
+sales_raw = LOAD '/data/sales.csv' USING PigStorage(',') 
+    AS (id:chararray, product:chararray, quantity:int, price:double, date:chararray, customer_id:chararray);
 
--- Chargement des données clients depuis HDFS  
-customers_raw = LOAD '/data/customers.json' USING JsonLoader('id:chararray, name:chararray, email:chararray, city:chararray, age:int');
+-- Chargement des données clients depuis CSV converti  
+-- Format: id,name,email,city,age
+customers_raw = LOAD '/data/customers.csv' USING PigStorage(',')
+    AS (id:chararray, name:chararray, email:chararray, city:chararray, age:int);
 
 -- 2. NETTOYAGE ET VALIDATION DES DONNÉES
 -- Afficher quelques échantillons pour debug
@@ -41,12 +43,12 @@ customers_clean = FILTER customers_raw BY
     id IS NOT NULL;
 
 -- Afficher le nombre d'enregistrements après nettoyage
-sales_count = GROUP sales_clean ALL;
-sales_total = FOREACH sales_count GENERATE COUNT(sales_clean) as total;
+sales_count_group = GROUP sales_clean ALL;
+sales_total = FOREACH sales_count_group GENERATE COUNT(sales_clean) as total;
 DUMP sales_total;
 
-customers_count = GROUP customers_clean ALL;
-customers_total = FOREACH customers_count GENERATE COUNT(customers_clean) as total;
+customers_count_group = GROUP customers_clean ALL;
+customers_total = FOREACH customers_count_group GENERATE COUNT(customers_clean) as total;
 DUMP customers_total;
 
 -- 3. TRANSFORMATIONS ET CALCULS
@@ -102,15 +104,10 @@ top_customers_sorted = ORDER top_customers BY customer_total DESC;
 top_10_customers = LIMIT top_customers_sorted 10;
 
 -- 5. SAUVEGARDE DES RÉSULTATS DANS HDFS
--- Créer les répertoires de sortie
-fs -mkdir -p /pig-output/product-analysis;
-fs -mkdir -p /pig-output/city-revenue;  
-fs -mkdir -p /pig-output/top-customers;
-
 -- Supprimer les anciens résultats s'ils existent
-fs -rmr /pig-output/product-analysis || true;
-fs -rmr /pig-output/city-revenue || true;
-fs -rmr /pig-output/top-customers || true;
+fs -rmr /pig-output/product-analysis;
+fs -rmr /pig-output/city-revenue;
+fs -rmr /pig-output/top-customers;
 
 -- Sauvegarder avec format CSV
 STORE product_summary_sorted INTO '/pig-output/product-analysis' USING PigStorage(',');

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Script pour transférer les données MongoDB vers HDFS
 # Projet Big Data - Traitement Distribué 2024-2025
 
@@ -40,14 +39,18 @@ export_collection() {
         
         # Vérifier si le fichier existe et n'est pas vide
         if [ -s "$TEMP_DIR/${collection}.json" ]; then
-            # Copier vers HDFS
-            hdfs dfs -put -f $TEMP_DIR/${collection}.json $HDFS_BASE/data/
+            # Copier vers HDFS via le conteneur hadoop-master
+            docker cp $TEMP_DIR/${collection}.json hadoop-master:/tmp/${collection}.json
+            docker exec hadoop-master hdfs dfs -put -f /tmp/${collection}.json /data/
             
             if [ $? -eq 0 ]; then
                 echo "[SUCCESS] Collection $collection copiée vers HDFS"
                 
                 # Vérifier dans HDFS
-                hdfs dfs -ls $HDFS_BASE/data/${collection}.json
+                docker exec hadoop-master hdfs dfs -ls /data/${collection}.json
+                
+                # Nettoyer le fichier temporaire dans hadoop-master
+                docker exec hadoop-master rm -f /tmp/${collection}.json
             else
                 echo "[ERROR] Échec de la copie vers HDFS pour $collection"
                 return 1
@@ -68,8 +71,9 @@ export_collection() {
 
 # Créer les répertoires HDFS s'ils n'existent pas
 echo "[INFO] Création des répertoires HDFS..."
-hdfs dfs -mkdir -p $HDFS_BASE/data
-hdfs dfs -mkdir -p $HDFS_BASE/pig-output
+docker exec hadoop-master hdfs dfs -mkdir -p /data
+docker exec hadoop-master hdfs dfs -mkdir -p /pig-output
+docker exec hadoop-master hdfs dfs -mkdir -p /spark-output
 
 # Exporter les collections existantes
 echo "[INFO] Début de l'export des collections..."
@@ -84,10 +88,10 @@ echo "[SUCCESS] Transfert MongoDB vers HDFS terminé!"
 
 # Vérifier les données dans HDFS
 echo "[INFO] Contenu de HDFS /data :"
-hdfs dfs -ls $HDFS_BASE/data/
+docker exec hadoop-master hdfs dfs -ls /data/
 
 # Afficher un aperçu des données
 echo "[INFO] Aperçu des données sales dans HDFS :"
-hdfs dfs -head $HDFS_BASE/data/sales.json
+docker exec hadoop-master hdfs dfs -head /data/sales.json
 
 echo "✅ Transfert terminé avec succès!"
