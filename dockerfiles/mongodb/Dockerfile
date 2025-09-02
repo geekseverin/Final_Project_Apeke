@@ -1,4 +1,8 @@
+RUN pip install pymongo
+
 FROM mongo:6.0
+
+
 
 # Copier le script d'initialisation
 COPY init-mongo.js /docker-entrypoint-initdb.d/

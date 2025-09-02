@@ -93,28 +93,38 @@ log_success "Répertoires HDFS créés"
 
 # 4.5. Transférer les données MongoDB vers HDFS
 log_info "Transfert des données MongoDB vers HDFS..."
-/transfer_mongodb_to_hdfs.sh
+
+# Exporter depuis MongoDB
+log_info "Export des collections depuis MongoDB..."
+docker exec mongodb mongoexport --host localhost:27017 \
+    --username admin --password password123 --authenticationDatabase admin \
+    --db bigdata --collection sales --out /tmp/sales.json --jsonArray
+
+docker exec mongodb mongoexport --host localhost:27017 \
+    --username admin --password password123 --authenticationDatabase admin \
+    --db bigdata --collection customers --out /tmp/customers.json --jsonArray
+
+# Transférer vers HDFS
+log_info "Transfert vers HDFS..."
+docker exec mongodb cat /tmp/sales.json | docker exec -i hadoop-master hdfs dfs -put -f - hdfs://hadoop-master:9000/data/sales.json
+docker exec mongodb cat /tmp/customers.json | docker exec -i hadoop-master hdfs dfs -put -f - hdfs://hadoop-master:9000/data/customers.json
+
+# Nettoyer les fichiers temporaires MongoDB
+docker exec mongodb rm -f /tmp/sales.json /tmp/customers.json
+
+# Vérifier
+docker exec hadoop-master hdfs dfs -ls hdfs://hadoop-master:9000/data/
 if [ $? -eq 0 ]; then
-    log_success "Données transférées vers HDFS"
+    log_success "Données transférées vers HDFS avec succès"
 else
     log_error "Erreur lors du transfert vers HDFS"
 fi
 
-# 5. Exécuter l'analyse Pig
-log_info "Exécution de l'analyse Apache Pig..."
-docker exec hadoop-master pig -f /scripts/pig/data_analysis.pig
-if [ $? -eq 0 ]; then
-    log_success "Analyse Pig terminée avec succès"
-else
-    log_error "Erreur lors de l'analyse Pig"
-fi
-
+# 6. Exécuter l'analyse Spark
 # 6. Exécuter l'analyse Spark
 log_info "Exécution de l'analyse Apache Spark..."
 docker exec hadoop-master spark-submit \
-    --jars /opt/hadoop/share/hadoop/common/lib/mongo-hadoop-core-2.0.2.jar,/opt/hadoop/share/hadoop/common/lib/mongodb-driver-3.12.11.jar \
-    --conf "spark.mongodb.input.uri=mongodb://admin:password123@mongodb:27017/bigdata.sales" \
-    --conf "spark.mongodb.output.uri=mongodb://admin:password123@mongodb:27017/bigdata.results" \
+    --conf "spark.sql.adaptive.enabled=true" \
     /scripts/spark/mongodb_reader.py
 
 if [ $? -eq 0 ]; then

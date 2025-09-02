@@ -1,5 +1,7 @@
 FROM python:3.9-slim
 
+RUN pip install pymongo
+
 # Installer les dépendances système
 RUN apt-get update && apt-get install -y \
     gcc \
