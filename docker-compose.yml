@@ -10,6 +10,7 @@ services:
       - "8088:8088"  # Yarn Web UI
       - "8080:8080"  # Spark Web UI
       - "7077:7077"  # Spark Master Port
+      - "4040:4040"  # Spark Application UI
     volumes:
       - ./config:/config
       - ./scripts:/scripts
@@ -18,8 +19,15 @@ services:
       - HADOOP_ROLE=master
       - CLUSTER_NAME=bigdata-cluster
       - JAVA_HOME=/usr/local/openjdk-8
+      - PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+      - PYSPARK_PYTHON=python3
     networks:
       - bigdata-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: ["/scripts/setup/init-hadoop.sh", "master"]
 
   # Secondary Master Node (SecondaryNameNode)
@@ -42,6 +50,11 @@ services:
       - bigdata-net
     depends_on:
       - hadoop-master
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9868"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: ["/scripts/setup/init-hadoop.sh", "secondary"]
 
   # Worker Node 1
@@ -61,10 +74,17 @@ services:
       - WORKER_ID=1
       - CLUSTER_NAME=bigdata-cluster
       - JAVA_HOME=/usr/local/openjdk-8
+      - PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+      - PYSPARK_PYTHON=python3
     networks:
       - bigdata-net
     depends_on:
       - hadoop-master
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: ["/scripts/setup/init-hadoop.sh", "worker"]
 
   # Worker Node 2
@@ -84,10 +104,17 @@ services:
       - WORKER_ID=2
       - CLUSTER_NAME=bigdata-cluster
       - JAVA_HOME=/usr/local/openjdk-8
+      - PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+      - PYSPARK_PYTHON=python3
     networks:
       - bigdata-net
     depends_on:
       - hadoop-master
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: ["/scripts/setup/init-hadoop.sh", "worker"]
 
   # Worker Node 3
@@ -107,10 +134,17 @@ services:
       - WORKER_ID=3
       - CLUSTER_NAME=bigdata-cluster
       - JAVA_HOME=/usr/local/openjdk-8
+      - PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+      - PYSPARK_PYTHON=python3
     networks:
       - bigdata-net
     depends_on:
       - hadoop-master
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: ["/scripts/setup/init-hadoop.sh", "worker"]
 
   # MongoDB
@@ -124,12 +158,19 @@ services:
     volumes:
       - mongodb_data:/data/db
       - ./scripts:/scripts
+      - ./dockerfiles/mongodb/sample-data:/sample-data
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password123
       - MONGO_INITDB_DATABASE=bigdata
     networks:
       - bigdata-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--host", "localhost:27017", "--eval", "db.runCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
 
   # Application Web Flask
   web-app:
@@ -143,6 +184,7 @@ services:
       - ./app:/app
     environment:
       - FLASK_ENV=development
+      - FLASK_DEBUG=1
       - MONGODB_URI=mongodb://admin:password123@mongodb:27017/bigdata?authSource=admin
       - HADOOP_MASTER=hadoop-master
     networks:
@@ -150,14 +192,26 @@ services:
     depends_on:
       - hadoop-master
       - mongodb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
 
 volumes:
   hadoop_master_data:
+    driver: local
   hadoop_secondary_data:
+    driver: local
   hadoop_worker1_data:
+    driver: local
   hadoop_worker2_data:
+    driver: local
   hadoop_worker3_data:
+    driver: local
   mongodb_data:
+    driver: local
 
 networks:
   bigdata-net:

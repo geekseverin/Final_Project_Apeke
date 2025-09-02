@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
+# CORRECTION : Installer pymongo dans l'image de base
+RUN pip3 install pymongo pyspark
+
 # Créer le répertoire SSH
 RUN mkdir -p /run/sshd
 
@@ -55,6 +58,10 @@ ENV PIG_HOME=/opt/pig
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 ENV SPARK_CONF_DIR=${SPARK_HOME}/conf
 ENV PATH=${PATH}:${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PIG_HOME}/bin
+
+# CORRECTION : Ajouter Python au PATH et configurer Spark pour utiliser Python3
+ENV PYTHONPATH=$SPARK_HOME/python/:$PYTHONPATH
+ENV PYSPARK_PYTHON=python3
 
 # Créer les répertoires de données
 RUN mkdir -p /hadoop/data/namenode && \
